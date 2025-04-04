@@ -8,10 +8,14 @@ from network import Network
 class OsImage:
     name: str
     source: str
+    nic_name: str
 
 class Os(Enum):
-    ROCKY_8_10 = OsImage(name="rocky8.x86_64.qcow2", source="https://dl.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-OCP-Base-8.10-20240528.0.x86_64.qcow2")
-    UBUNTU_24_04 = OsImage(name="ubuntu-24.04.x86_64.qcow2", source="https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img")
+    ROCKY_8_10 = OsImage(name="rocky8.x86_64.qcow2", source="https://dl.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-OCP-Base-8.10-20240528.0.x86_64.qcow2", nic_name="eth")
+    UBUNTU_24_04 = OsImage(name="ubuntu-24.04.x86_64.qcow2", source="https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img", nic_name="ens")
+
+    def is_rhel(self) -> bool:
+        return self.value in (Os.ROCKY_8_10, )
 
 @dataclass
 class Node:

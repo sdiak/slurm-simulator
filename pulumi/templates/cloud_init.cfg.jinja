@@ -71,6 +71,12 @@ packages:
 runcmd:
     - systemctl start qemu-guest-agent
     - systemctl restart systemd-sysctl
+{% if rhel %}
     - grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=1 systemd.legacy_systemd_cgroup_controller=0 cgroup_no_v1=all"
     - grub2-mkconfig -o /etc/grub2.cfg
+{% else %}
+    - sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 console=ttyS0"/GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 console=ttyS0 systemd.unified_cgroup_hierarchy=1 systemd.legacy_systemd_cgroup_controller=0 cgroup_no_v1=all"/' /etc/default/grub.d/50-cloudimg-settings.cfg
+    - update-grub
+{% endif %}
     - reboot
+

@@ -2,14 +2,13 @@
 
 """
 import pulumi
-import pulumi_libvirt as libvirt
 import ipaddress
 
 
 import virsh
 from cluster import Cluster
 from network import Network
-from node import Node
+from node import Node, Os
 from user import User
 
 def main():
@@ -21,6 +20,7 @@ def main():
     cluster.add_user(User(name="user2", groups={'group3'}))
 
     cluster.add_node(Node(name="admin", networks=[cluster.networks['admin'], cluster.networks['storage']], cpus=4, mem_gb=2, roles={'admin', 'slurm-controller', 'nfs-server', 'login'}))
+    cluster.add_node(Node(name="ubuntu01", networks=[cluster.networks['admin'], cluster.networks['storage']], cpus=4, mem_gb=2, roles={'compute'}, os=Os.UBUNTU_24_04))
 
     virsh.build(cluster)
     pulumi.export("cluster", cluster.output)
