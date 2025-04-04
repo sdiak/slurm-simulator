@@ -4,5 +4,5 @@ libvirt-python==11.2.0
 mypy==1.15.0
 mypy-extensions==1.0.0
 pulumi==3.160.0
-# Not the latest but newer ones ignore keyfile parameter to libvirt uri
+# Not the latest because newer ones ignore keyfile parameter to libvirt uri
 pulumi-libvirt==0.4.4
