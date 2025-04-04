@@ -1,0 +1,76 @@
+#cloud-config
+{% for group in groups %}
+{% if loop.first %}
+groups:
+{% endif %}
+  - {{ group }}
+{% endfor %}
+users:
+{% for user in users %}
+  - name: {{ user.name }}
+{% for key in user.ssh_authorized_keys %}
+{% if loop.first %}
+    ssh-authorized-keys:
+{% endif %}
+      - {{ key }}
+{% endfor %}
+{% if user.name != 'root' %}
+    uid: {{ user.uid }}
+    homedir: {{ user.homedir }}
+    plain_text_passwd: {{ user.password }}
+{% if user.groups|length > 0 %}
+    groups: {% for group in user.groups %}{% if not loop.first %},{% endif %} {{ group }}{% endfor +%}
+{% endif %}
+{% endif %}
+{% endfor %}
+hostname: {{ hostname }}
+fqdn: {{ fqdn }}
+manage_etc_hosts: true
+# runcmd:
+#   - dhclient -r eth0
+#   - dhclient eth0
+write_files:
+{% if http_proxy is defined %}
+  - path: /etc/profile.d/cloud-init-defined-proxies.sh
+    permissions: "0644"
+    owner: root
+    content: |
+      PROXY="{{ http_proxy }}"
+      export http_proxy=$PROXY
+      export https_proxy=$PROXY
+      export ftp_proxy=$PROXY
+      export HTTP_PROXY=$PROXY
+      export HTTPS_PROXY=$PROXY
+      export FTP_PROXY=$PROXY
+      export no_proxy="127.0.0.1, localhost"
+  - path: /etc/yum.conf
+    content: |
+      proxy="{{ http_proxy }}"
+    append: true
+{% endif %}
+  - path: /etc/sysctl.d/10-disable-ipv6.conf
+    permissions: "0644"
+    owner: root
+    content: |
+      net.ipv6.conf.all.disable_ipv6=1
+      net.ipv6.conf.default.disable_ipv6=1
+package_upgrade: false
+manage_etc_hosts: true
+ssh_pwauth: true
+chpasswd:
+  list: |
+{% for user in users %}
+{% if user.name == 'root' %}
+     root:{{ user.password }}
+{% endif %}
+{% endfor %}
+  expire: false
+packages:
+    - qemu-guest-agent
+    - python3
+runcmd:
+    - systemctl start qemu-guest-agent
+    - systemctl restart systemd-sysctl
+    - grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=1 systemd.legacy_systemd_cgroup_controller=0 cgroup_no_v1=all"
+    - grub2-mkconfig -o /etc/grub2.cfg
+    - reboot

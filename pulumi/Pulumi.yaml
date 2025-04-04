@@ -1,0 +1,9 @@
+name: slurm-simulator
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Simulate a cluster to help you test various Slurm settings
+config:
+  node-pool: default
+
