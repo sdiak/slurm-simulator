@@ -6,3 +6,4 @@ mypy-extensions==1.0.0
 pulumi==3.160.0
 # Not the latest because newer ones ignore keyfile parameter to libvirt uri
 pulumi-libvirt==0.4.4
+setuptools==78.1.0
