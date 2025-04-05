@@ -43,10 +43,18 @@ write_files:
       export HTTPS_PROXY=$PROXY
       export FTP_PROXY=$PROXY
       export no_proxy="127.0.0.1, localhost"
+{% if rhel %}
   - path: /etc/yum.conf
     content: |
       proxy="{{ http_proxy }}"
     append: true
+{% else %}
+  - path: /etc/apt/apt.conf
+    content: |
+      Acquire::http::Proxy="{{ http_proxy }}"
+      Acquire::https::Proxy="{{ http_proxy }}"
+    append: true
+{% endif %}
 {% endif %}
   - path: /etc/sysctl.d/10-disable-ipv6.conf
     permissions: "0644"
