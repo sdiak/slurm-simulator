@@ -38,7 +38,7 @@ def vol_list(pool: str, logger: Any = logging) -> list[str]:
     conn = libvirt.open()
     try:
         return conn.storagePoolLookupByName(pool).listVolumes()
-    except:
+    except: # noqa: E722
         logger.exception("Error")
     finally:
         conn.close()
