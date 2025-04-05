@@ -3,30 +3,31 @@
 import logging
 import subprocess
 from dataclasses import dataclass
-from typing import Any, Optional, Dict, List
-import libvirt
+from typing import Any
+import libvirt # type: ignore
 import pulumi
 import pulumi_libvirt as pulibvirt
 
+from common import not_none
 from cluster import Cluster
 from network import Network
 from node import Node, OsImage
 from user import User
 from cloud_init import network_config_rendered, cloud_init_rendered
 
-def net_dhcp_leases(network_name: str, logger: Any = logging) -> Optional[Dict[str, str]]:
+def net_dhcp_leases(network_name: str, logger: Any = logging) -> dict[str, str|None] | None:
     """Returns a dictionnary mapping mac-address to ip obtained from the network dhcp server
 
     Args:
         network_name (str): the libvirt network name
 
     Returns:
-        dict[str, str]|None: a mapping of domain interface mac-address to ip (or None in case of errors)
+        dict[str, str|None]|None: a mapping of domain interface mac-address to ip (or None in case of errors)
     """
     buffer = _exec([ 'virsh', 'net-dhcp-leases', network_name ], logger)
     if buffer is None:
         return None
-    result = {}
+    result : dict[str, str|None] = {}
     for line in buffer.splitlines():
         cols = line.split()
         if len(cols) == 7 and len(cols[2].split(':')) == 6:
@@ -34,7 +35,7 @@ def net_dhcp_leases(network_name: str, logger: Any = logging) -> Optional[Dict[s
             result[cols[2].lower()] = None if len(cols[4]) == 0 else cols[4]
     return result
 
-def vol_list(pool: str, logger: Any = logging) -> List[str]:
+def vol_list(pool: str, logger: Any = logging) -> list[str]:
     conn = libvirt.open()
     try:
         return conn.storagePoolLookupByName(pool).listVolumes()
@@ -52,10 +53,10 @@ class DomIfAddr:
     name: str
     mac_addr: str
     protocol: str
-    ip: str
+    ip: str|None
 
     @staticmethod
-    def of(domain_name: str, logger: Any = logging) -> Optional[List['DomIfAddr']]:
+    def of(domain_name: str, logger: Any = logging) -> list['DomIfAddr']|None:
         buffer = _exec(['virsh', 'domifaddr', domain_name], logger)
         if buffer is None:
             return None
@@ -64,13 +65,13 @@ class DomIfAddr:
             cols = line.split()
             if len(cols) == 4 and len(cols[1].split(':')) == 6:
                 cols[3] = cols[3].split('/')[0]
-                cols[3] = None if len(cols[3]) == 0 else cols[3]
-                result.append(DomIfAddr(name=cols[0], mac_addr=cols[1], protocol=cols[2], ip=cols[3]))
+                ip = None if len(cols[3]) == 0 else cols[3]
+                result.append(DomIfAddr(name=cols[0], mac_addr=cols[1], protocol=cols[2], ip=ip))
         return result
 
 
 
-def _exec(cmd: List[str], logger: Any) -> Optional[str]:
+def _exec(cmd: list[str], logger: Any) -> str|None:
     try:
         virsh_result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
         if virsh_result.returncode == 0:
@@ -91,7 +92,7 @@ def __libvirt_create_volume(cluster: Cluster, resource_name: str, img: OsImage) 
         **base_volume_ref
     )
 
-def __libvirt_base_image_volume(pool: str, img: OsImage) -> pulibvirt.Volume | Dict[str,str]:
+def __libvirt_base_image_volume(pool: str, img: OsImage) -> pulibvirt.Volume | dict[str,str]:
     # Do not recreate if it exists
     if vol_exists(pool, img.name):
         return dict(base_volume_name=img.name, base_volume_pool=pool)
@@ -159,7 +160,7 @@ def __build_domain(cluster: Cluster, node: Node):
         qemu_agent=True,
         graphics=pulibvirt.DomainGraphicsArgs(type="vnc"),
         network_interfaces=[ pulibvirt.DomainNetworkInterfaceArgs(
-            network_id = net.resource.id,
+            network_id = not_none(net.resource).id,
             wait_for_lease = net in node.networks,
             hostname=cluster.name + "-" + node.name,
         ) for net in node.networks ],

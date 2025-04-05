@@ -25,7 +25,7 @@ class Network:
     dhcp: bool = True
     """ Manage this network using DHCP """
 
-    resource = None
+    resource: pulibvirt.Network|None = None
 
     def __post_init__(self):
         common.check_identifier(self.name, "network name")
