@@ -120,6 +120,7 @@ def __build_network(cluster: Cluster, network: Network):
         addresses=[ str(network.address) ],
         domain=domain(cluster, network),
         mode = "nat",
+        is_admin = cluster.admin_network() == network,
         libvirt=dict(name=cluster.name + "-" + network.name, dhcp=network.dhcp),
     ))
 
@@ -186,3 +187,4 @@ def build(cluster: Cluster):
     # Build the nodes
     cluster.output['hosts'] = []
     __force_eval(map(lambda n : __build_domain(cluster, n), cluster.nodes.values()))
+    cluster.output['driver'] = 'libvirt'

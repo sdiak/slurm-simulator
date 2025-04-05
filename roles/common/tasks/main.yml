@@ -1,0 +1,6 @@
+
+- name: Wait for cloud-init to finish
+  command: cloud-init status --wait
+  changed_when: false
+  register: status
+  failed_when: status.rc != 0 and status.rc != 2

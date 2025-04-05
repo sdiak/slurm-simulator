@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+
+'''
+Converts pulumi hosts to ansible hosts
+'''
+
+import subprocess
+import sys
+import json
+import traceback
+from typing import Any
+from pathlib import Path
+from dataclasses import dataclass, field
+
+PULIMI_PATH=Path(__file__).parent / 'pulumi'
+sys.path.append(str(PULIMI_PATH))
+from virsh import net_dhcp_leases
+
+def main():
+    infra = pulumi_stack_output_infra()
+    hosts : list[dict[str, Any]] = infra['hosts']
+
+    roles = {}
+    ungrouped = []
+    hostsvars = {  }
+    all = {
+        "hosts": [],
+        "children": ["ungrouped"],
+        "vars": infra.get('ansible_vars', {}),
+    }
+    for host in hosts:
+        all['hosts'].append(host['name'])
+        ansible_vars = host.get('ansible_vars', {})
+        ansible_vars['ansible_user'] = 'root'
+        if host.get('ipv4') is not None:
+            ansible_vars['ansible_host'] = str(host.get('ipv4'))
+        host_roles = host.get('roles', [])
+        for role in host_roles:
+            if role not in roles:
+                roles[role] = { 'hosts': [] }
+                all['children'].append(role)
+            roles[role]['hosts'].append(host['name'])
+        if len(host_roles) == 0:
+            ungrouped.append(host['name'])
+        if len(ansible_vars):
+            hostsvars[host['name']] = ansible_vars
+
+    ansible_inventory = {
+        '_meta': { 'hostvars': hostsvars },
+        'all': all,
+        'ungrouped': {
+            'hosts': ungrouped
+        }
+    }
+    for key, val in roles.items():
+        ansible_inventory[key] = val
+    print(json.dumps(ansible_inventory, indent=2))
+    
+
+def pulumi_stack_output_infra() -> dict[str, Any]:
+    cmd = ['pulumi', 'stack', 'output', 'cluster']
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=PULIMI_PATH)
+        if res.returncode != 0:
+            print(res.stderr.decode('utf-8'), file=sys.stderr)
+            sys.exit(res.returncode)
+        cluster : dict[str, Any] = json.loads(res.stdout)
+        if cluster.get('driver', '?') == 'libvirt':
+            __libvirt_postprocess_output(cluster)
+        return cluster
+    except Exception as e:
+        print(f"Unable to run `{' '.join(cmd)}`: {e!r}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+
+
+@dataclass
+class LibVirtNet:
+    resource_name: str
+    dhcp4: bool = False
+    leases: dict[str, str|None] = field(default_factory=dict, init=False)
+
+    def __post_init__(self):
+        if self.dhcp4:
+            self.leases = net_dhcp_leases(self.resource_name)
+            print(self.leases)
+
+def __libvirt_postprocess_output(infra : dict[str, Any]):
+    leases: dict[str, str] = {}
+    for net in infra.get('networks', {}):
+        if not net['is_admin']:
+            continue
+        libvirt_info : dict[str, Any] = net.get('libvirt', {})
+        if libvirt_info.get('dhcp', False):
+            leases = net_dhcp_leases(libvirt_info['name'])
+    for host in infra['hosts']:
+        if host.get('ipv4', None) is None:
+            mac_addr: str = host['libvirt'].get('network_interfaces', [{}])[0].get('mac', '').lower()
+            try:
+                host['ipv4'] = leases[mac_addr]
+            except KeyError:
+                print(f'Ip address of host(name={host.get("name", "?")!r}, mac={mac_addr!r}) is not yet known\n\ttry again later ...', file=sys.stderr)
+                sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
