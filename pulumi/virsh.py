@@ -8,11 +8,10 @@ import libvirt # type: ignore
 import pulumi
 import pulumi_libvirt as pulibvirt
 
-from common import not_none
+from common import not_none, domain
 from cluster import Cluster
 from network import Network
 from node import Node, OsImage
-from user import User
 from cloud_init import network_config_rendered, cloud_init_rendered
 
 def net_dhcp_leases(network_name: str, logger: Any = logging) -> dict[str, str|None] | None:
@@ -104,12 +103,6 @@ def __libvirt_base_image_volume(pool: str, img: OsImage) -> pulibvirt.Volume | d
         source=img.source
     )
 
-def __domain(cluster: Cluster, net: str|Network) -> str:
-    if net == cluster.admin_network():
-        return cluster.name + ".home.arpa."
-    net = net.name if isinstance(net, Network) else net
-    return net + "." + cluster.name + ".home.arpa."
-
 def __build_network(cluster: Cluster, network: Network):
     pulumi.log.debug(f"{__name__}: __build_network({cluster.name=!r}, {network.name=!r})")
     network.resource = pulibvirt.Network(
@@ -117,7 +110,7 @@ def __build_network(cluster: Cluster, network: Network):
         name=cluster.name + "-" + network.name,
         addresses=[ str(network.address) ],
         autostart=network.autostart,
-        domain=__domain(cluster, network),
+        domain=domain(cluster, network),
         mode = "nat",
         dns = pulibvirt.NetworkDnsArgs(enabled=True, local_only=False,) if network.dns else None,
         dhcp = pulibvirt.NetworkDhcpArgs(enabled=True) if network.dhcp else None,
@@ -125,7 +118,7 @@ def __build_network(cluster: Cluster, network: Network):
     cluster.output['networks'].append(dict(
         name=network.name,
         addresses=[ str(network.address) ],
-        domain=__domain(cluster, network),
+        domain=domain(cluster, network),
         mode = "nat",
         libvirt=dict(name=cluster.name + "-" + network.name, dhcp=network.dhcp),
     ))
@@ -135,12 +128,12 @@ def __build_domain(cluster: Cluster, node: Node):
     # Dictionary for cloud-init rendering
     env = dict(
         hostname=node.name,
-        fqdn=node.name + '.' + __domain(cluster, cluster.admin_network()),
+        fqdn=node.name + '.' + domain(cluster, cluster.admin_network()),
         users=[user.to_json() for user in cluster.users.values() ],
         groups=list(cluster.groups),
         num_nets=len(cluster.networks),
         rhel=node.os.is_rhel(),
-        nics=node.get_nics(cluster.networks),
+        nics=node.get_nics(cluster.name, cluster.admin_network()),
     )
     if cluster.config.get('http_proxy') is not None:
         env['http_proxy'] = cluster.config.get('http_proxy')
@@ -157,7 +150,7 @@ def __build_domain(cluster: Cluster, node: Node):
         pool=cluster.config.get('node-pool', 'default'),
     )
     volume = __libvirt_create_volume(cluster, cluster.name + "-" + node.name, node.os.value)
-    domain = pulibvirt.Domain(
+    dom = pulibvirt.Domain(
         resource_name=cluster.name + "-" + node.name,
         name=cluster.name + "-" + node.name,
         memory=int(node.mem_gb * 1024.),
@@ -178,7 +171,7 @@ def __build_domain(cluster: Cluster, node: Node):
     )
     cluster.output['hosts'].append(dict(
         name=node.name, roles=list(node.roles), ansible_vars={},
-        libvirt=dict(name=domain.name, network_interfaces=domain.network_interfaces)
+        libvirt=dict(name=dom.name, network_interfaces=dom.network_interfaces)
     ))
 
 def __force_eval(collection):

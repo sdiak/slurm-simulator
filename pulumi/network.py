@@ -33,3 +33,6 @@ class Network:
     
     def __hash__(self):
         return hash(self.name)
+    
+    def dns_server(self) -> str:
+        return str(self.address[1])

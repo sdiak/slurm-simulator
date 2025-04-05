@@ -4,4 +4,9 @@ ethernets:
   {{ nic.name }}:
     dhcp6: false
     dhcp4: {{ nic.dhcp4 }}
+{% if nic.nameservers is defined %}
+    nameservers:
+        search: {{ nic.nameservers.search }}
+        addresses: {{ nic.nameservers.addresses }}
+{% endif %}
 {% endfor %}

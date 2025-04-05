@@ -47,21 +47,22 @@ class Node:
         common.check_identifier(self.name, "node name")
         map(common.check_identifier, self.roles)
 
-    def get_nics(self, cluster_networks: OrderedDict[str, Network]) -> list[dict[str, Any]]:
+    def get_nics(self, cluster_name: str, admin_net: Network) -> list[dict[str, Any]]:
         nics = []
         i = self.os.value.nic_offset
         for net in self.networks:
-            nics.append(dict(
+            nic = dict(
                 name=self.os.value.nic_name + str(i),
                 dhcp4=True
-            ))
+            )
+            if False and self.os.is_rhel() and not net == admin_net:
+                nic['nameservers'] = dict(
+                    search='[' + common.domain(cluster_name, net) + ']',
+                    addresses='[' + net.dns_server() + ']',
+                )
+            nics.append(nic)
             i += 1
-        # for cluster_net in cluster_networks.values():
-        #     nics.append(dict(
-        #         name=self.os.value.nic_name + str(i),
-        #         dhcp4=cluster_net in self.networks
-        #     ))
-        #     i += 1
+            
         return nics
         
     
