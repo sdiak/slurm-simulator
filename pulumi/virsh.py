@@ -86,6 +86,7 @@ def __libvirt_create_volume(cluster: Cluster, resource_name: str, img: OsImage) 
     base_volume_ref = dict(base_volume_id=base_volume.id) if isinstance(base_volume, pulibvirt.Volume) else base_volume
     return pulibvirt.Volume(
         resource_name=resource_name,
+        name=resource_name,
         pool=cluster.config.get('node-pool', 'default'),
         **base_volume_ref
     )
@@ -105,7 +106,8 @@ def __libvirt_base_image_volume(pool: str, img: OsImage) -> pulibvirt.Volume | D
 def __build_network(cluster: Cluster, network: Network):
     pulumi.log.debug(f"{__name__}: __build_network({cluster.name=!r}, {network.name=!r})")
     network.resource = pulibvirt.Network(
-        cluster.name + "-" + network.name,
+        resource_name=cluster.name + "-" + network.name,
+        name=cluster.name + "-" + network.name,
         addresses=[ str(network.address) ],
         autostart=network.autostart,
         domain=cluster.name + "." + network.name + ".local",
@@ -137,10 +139,11 @@ def __build_domain(cluster: Cluster, node: Node):
         env['http_proxy'] = cluster.config.get('http_proxy')
     network_config = network_config_rendered(env)
     user_data = cloud_init_rendered(env)
-    pulumi.log.info(network_config)
+    pulumi.log.debug(network_config)
     pulumi.log.debug(user_data)
     cloud_init = pulibvirt.CloudInitDisk(
-        cluster.name + "-" + node.name + "-commoninit.iso",
+        resource_name=cluster.name + "-" + node.name + "-commoninit.iso",
+        name=cluster.name + "-" + node.name + "-commoninit.iso",
         meta_data=user_data,
         user_data=user_data,
         network_config=network_config,
@@ -158,7 +161,7 @@ def __build_domain(cluster: Cluster, node: Node):
         network_interfaces=[ pulibvirt.DomainNetworkInterfaceArgs(
             network_id = net.resource.id,
             wait_for_lease = net in node.networks,
-            hostname=cluster.name + "-" + node.name
+            hostname=cluster.name + "-" + node.name,
         ) for net in node.networks ],
         disks=[ pulibvirt.DomainDiskArgs(volume_id=volume.id) ],
         consoles=[
