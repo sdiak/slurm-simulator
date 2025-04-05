@@ -123,7 +123,6 @@ def __build_network(cluster: Cluster, network: Network):
 
 def __build_domain(cluster: Cluster, node: Node):
     pulumi.log.debug(f"{__name__}: __build_domain({cluster.name=!r}, {node.name=!r})")
-    pulumi.log.info(repr(cluster.users.values()))
     # Dictionary for cloud-init rendering
     env = dict(
         hostname=node.name,
@@ -131,15 +130,15 @@ def __build_domain(cluster: Cluster, node: Node):
         users=[user.to_json() for user in cluster.users.values() ],
         groups=list(cluster.groups),
         num_nets=len(cluster.networks),
-        nic_name=node.os.value.nic_name,
         rhel=node.os.is_rhel(),
+        nics=node.get_nics(cluster.networks),
     )
     if cluster.config.get('http_proxy') is not None:
         env['http_proxy'] = cluster.config.get('http_proxy')
     network_config = network_config_rendered(env)
     user_data = cloud_init_rendered(env)
     pulumi.log.info(network_config)
-    pulumi.log.info(user_data)
+    pulumi.log.debug(user_data)
     cloud_init = pulibvirt.CloudInitDisk(
         cluster.name + "-" + node.name + "-commoninit.iso",
         meta_data=user_data,
@@ -158,9 +157,9 @@ def __build_domain(cluster: Cluster, node: Node):
         graphics=pulibvirt.DomainGraphicsArgs(type="vnc"),
         network_interfaces=[ pulibvirt.DomainNetworkInterfaceArgs(
             network_id = net.resource.id,
-            wait_for_lease = True,
+            wait_for_lease = net in node.networks,
             hostname=cluster.name + "-" + node.name
-        ) for net in cluster.networks.values() ],
+        ) for net in node.networks ],
         disks=[ pulibvirt.DomainDiskArgs(volume_id=volume.id) ],
         consoles=[
             pulibvirt.DomainConsoleArgs(type="pty", target_type="serial", target_port="0"),

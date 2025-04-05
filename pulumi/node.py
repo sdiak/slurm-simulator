@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
+from collections import OrderedDict
 from enum import Enum
+from typing import Any
 
 import common
 from network import Network
@@ -9,13 +11,14 @@ class OsImage:
     name: str
     source: str
     nic_name: str
+    nic_offset: int
 
 class Os(Enum):
-    ROCKY_8_10 = OsImage(name="rocky8.x86_64.qcow2", source="https://dl.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-OCP-Base-8.10-20240528.0.x86_64.qcow2", nic_name="eth")
-    UBUNTU_24_04 = OsImage(name="ubuntu-24.04.x86_64.qcow2", source="https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img", nic_name="ens")
+    ROCKY_8_10 = OsImage(name="rocky8.x86_64.qcow2", source="https://dl.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-OCP-Base-8.10-20240528.0.x86_64.qcow2", nic_name="eth", nic_offset=0)
+    UBUNTU_24_04 = OsImage(name="ubuntu-24.04.x86_64.qcow2", source="https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img", nic_name="ens", nic_offset=3)
 
     def is_rhel(self) -> bool:
-        return self.value in (Os.ROCKY_8_10, )
+        return self in (Os.ROCKY_8_10, )
 
 @dataclass
 class Node:
@@ -43,5 +46,22 @@ class Node:
     def __post_init__(self):
         common.check_identifier(self.name, "node name")
         map(common.check_identifier, self.roles)
+
+    def get_nics(self, cluster_networks: OrderedDict[str, Network]) -> list[dict[str, Any]]:
+        nics = []
+        i = self.os.value.nic_offset
+        for net in self.networks:
+            nics.append(dict(
+                name=self.os.value.nic_name + str(i),
+                dhcp4=True
+            ))
+            i += 1
+        # for cluster_net in cluster_networks.values():
+        #     nics.append(dict(
+        #         name=self.os.value.nic_name + str(i),
+        #         dhcp4=cluster_net in self.networks
+        #     ))
+        #     i += 1
+        return nics
         
     
