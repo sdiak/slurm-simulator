@@ -104,6 +104,12 @@ def __libvirt_base_image_volume(pool: str, img: OsImage) -> pulibvirt.Volume | d
         source=img.source
     )
 
+def __domain(cluster: Cluster, net: str|Network) -> str:
+    if net == cluster.admin_network():
+        return cluster.name + ".home.arpa."
+    net = net.name if isinstance(net, Network) else net
+    return net + "." + cluster.name + ".home.arpa."
+
 def __build_network(cluster: Cluster, network: Network):
     pulumi.log.debug(f"{__name__}: __build_network({cluster.name=!r}, {network.name=!r})")
     network.resource = pulibvirt.Network(
@@ -111,7 +117,7 @@ def __build_network(cluster: Cluster, network: Network):
         name=cluster.name + "-" + network.name,
         addresses=[ str(network.address) ],
         autostart=network.autostart,
-        domain=cluster.name + "." + network.name + ".local",
+        domain=__domain(cluster, network),
         mode = "nat",
         dns = pulibvirt.NetworkDnsArgs(enabled=True, local_only=False,) if network.dns else None,
         dhcp = pulibvirt.NetworkDhcpArgs(enabled=True) if network.dhcp else None,
@@ -119,7 +125,7 @@ def __build_network(cluster: Cluster, network: Network):
     cluster.output['networks'].append(dict(
         name=network.name,
         addresses=[ str(network.address) ],
-        domain=cluster.name + "." + network.name + ".local",
+        domain=__domain(cluster, network),
         mode = "nat",
         libvirt=dict(name=cluster.name + "-" + network.name, dhcp=network.dhcp),
     ))
@@ -129,7 +135,7 @@ def __build_domain(cluster: Cluster, node: Node):
     # Dictionary for cloud-init rendering
     env = dict(
         hostname=node.name,
-        fqdn=node.name + '.' + cluster.name + ".admin.local",
+        fqdn=node.name + '.' + __domain(cluster, cluster.admin_network()),
         users=[user.to_json() for user in cluster.users.values() ],
         groups=list(cluster.groups),
         num_nets=len(cluster.networks),
@@ -161,8 +167,8 @@ def __build_domain(cluster: Cluster, node: Node):
         graphics=pulibvirt.DomainGraphicsArgs(type="vnc"),
         network_interfaces=[ pulibvirt.DomainNetworkInterfaceArgs(
             network_id = not_none(net.resource).id,
-            wait_for_lease = net in node.networks,
-            hostname=cluster.name + "-" + node.name,
+            wait_for_lease = True,
+            hostname=node.name,
         ) for net in node.networks ],
         disks=[ pulibvirt.DomainDiskArgs(volume_id=volume.id) ],
         consoles=[

@@ -13,7 +13,7 @@ from user import User
 
 def main():
     cluster = Cluster(name=pulumi.get_stack(), config=pulumi.Config())
-    cluster.add_network(Network(name="admin", address=ipaddress.IPv4Network('10.0.0.0/24')))
+    cluster.add_network(Network(name="admin", address=ipaddress.IPv4Network('10.0.0.0/24')), admin=True)
     cluster.add_network(Network(name="storage", address=ipaddress.IPv4Network('10.0.1.0/24')))
     cluster.add_network(Network(name="fabric", address=ipaddress.IPv4Network('10.0.2.0/24')))
     cluster.add_user(User(name="root", password="abcd", uid=0))

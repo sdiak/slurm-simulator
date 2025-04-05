@@ -36,27 +36,38 @@ class Cluster:
 
     __next_uid: int = field(repr=False, default=1000)
     __uids: set[int] = field(default_factory=set)
+    __admin_network: Network|None = None
 
     def __post_init__(self):
         common.check_identifier(self.name, "cluster name")
 
-    def add_network(self, network: Network):
+    def add_network(self, network: Network, admin: bool = False):
         """Add a network to this cluster
 
         Args:
             network (Network): The network
+            admin (bool): Is this the administration network
 
         Raises:
             ValueError: when the network is invalid
         """
         if len(self.nodes) > 0:
             raise ValueError("Networks can not be added after nodes are defined")
+        if admin and self.__admin_network is not None:
+            raise ValueError("Only one admin network can be defined")
         if network.name in self.networks:
             raise ValueError(f"Duplicate network name {network.name}")
         for net in self.networks.values():
             if net.address.overlaps(network.address):
                 raise ValueError(f"{network.name}:{network.address} overlaps with existing {net.name}:{net.address}")
         self.networks[network.name] = network
+        if admin:
+            self.__admin_network = network
+    
+    def admin_network(self) -> Network:
+        if self.__admin_network is None:
+            raise ValueError("The admin network is not defined")
+        return self.__admin_network
 
     def add_node(self, node: Node):
         """Add a node to this cluster
