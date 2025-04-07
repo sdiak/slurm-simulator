@@ -1,0 +1,3 @@
+{% for export in nfs.exports %}
+{{ export }} *(rw,sync,no_subtree_check,no_root_squash)
+{% endfor %}

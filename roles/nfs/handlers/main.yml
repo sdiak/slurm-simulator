@@ -1,0 +1,16 @@
+
+- name: nfs-exportfs
+  command: exportfs -arv
+  listen: "nfs-exportfs"
+
+- name: daemon-reload
+  command: systemctl daemon-reload
+  listen: "mount-all"
+
+- name: mount-all
+  command: mount -a
+  listen: "mount-all"
+
+- name: allow-root-ssh-key
+  shell: "cat /root/.ssh/id_ed25519.pub >> /root/.ssh/authorized_keys"
+  listen: "allow-root-ssh-key"

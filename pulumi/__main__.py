@@ -20,11 +20,11 @@ def main():
     cluster.add_user(User(name="user1", groups={'group1', 'group2'}))
     cluster.add_user(User(name="user2", groups={'group3'}))
 
-    cluster.add_node(Node(name="admin", networks=[cluster.networks['admin'], cluster.networks['storage']], cpus=4, mem_gb=2, roles={'slurmctld', 'nfsd', 'login'}))
-    cluster.add_node(Node(name="ubuntu01", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], cpus=4, mem_gb=1, roles={'compute'}, os=Os.UBUNTU_24_04))
-    cluster.add_node(Node(name="ubuntu02", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], cpus=4, mem_gb=1, roles={'compute'}, os=Os.UBUNTU_24_04))
-    cluster.add_node(Node(name="rocky01", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], cpus=4, mem_gb=1, roles={'compute'}))
-    cluster.add_node(Node(name="rocky02", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], cpus=4, mem_gb=1, roles={'compute'}))
+    cluster.add_node(Node(name="admin", networks=[cluster.networks['admin'], cluster.networks['storage']], mem_gb=2, roles={'slurmctld', 'nfsd', 'login'}))
+    cluster.add_node(Node(name="ubuntu01", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], mem_gb=1, roles={'compute'}, os=Os.UBUNTU_24_04))
+    cluster.add_node(Node(name="ubuntu02", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], mem_gb=1, roles={'compute'}, os=Os.UBUNTU_24_04))
+    cluster.add_node(Node(name="rocky01", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], mem_gb=1, roles={'compute'}))
+    cluster.add_node(Node(name="rocky02", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], mem_gb=1, roles={'compute'}))
 
     virsh.build(cluster)
     pulumi.export("cluster", cluster.output)

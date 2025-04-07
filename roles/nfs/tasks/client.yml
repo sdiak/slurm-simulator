@@ -1,0 +1,14 @@
+
+- name: Install nfs client
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ os_vars[ansible_facts['os_family']]['nfs']['client-package'] }}"
+  
+- name: Update /etc/fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: "{{ nfs_server }}:{{ item }}    {{ item }}    nfs    defaults     0 0"
+  notify: "mount-all"
+  loop: "{{ nfs.exports }}"
+  

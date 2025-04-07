@@ -4,3 +4,17 @@
   changed_when: false
   register: status
   failed_when: status.rc != 0 and status.rc != 2
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items: [ "vim" ]
+
+- name: "Creates /root/.ssh/config"
+  ansible.builtin.template:
+    src: root-ssh-config.jinja2
+    dest: /root/.ssh/config
+    owner: root
+    group: root
+    mode: "0640"

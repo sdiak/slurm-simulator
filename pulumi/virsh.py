@@ -155,7 +155,7 @@ def __build_domain(cluster: Cluster, node: Node):
         resource_name=cluster.name + "-" + node.name,
         name=cluster.name + "-" + node.name,
         memory=int(node.mem_gb * 1024.),
-        vcpu=node.cpus,
+        vcpu=node.total_cpus(),
         cloudinit=cloud_init.id,
         qemu_agent=True,
         graphics=pulibvirt.DomainGraphicsArgs(type="vnc"),

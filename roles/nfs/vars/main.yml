@@ -1,0 +1,17 @@
+nfs:
+  exports:
+    - /home
+    - /root
+
+os_vars:
+  RedHat:
+    nfs:
+      server-package: [ nfs-utils ]
+      server-service: nfs-server
+      client-package: []
+
+  Debian:
+    nfs:
+      server-package: [ nfs-kernel-server ]
+      server-service: nfs-kernel-server
+      client-package: [ nfs-common ]

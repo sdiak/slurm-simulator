@@ -1,0 +1,16 @@
+
+- name: Setting server name
+  ansible.builtin.set_fact:
+    nfs_server: "{{ groups['nfsd'][0] }}"
+
+- name: Install server
+  ansible.builtin.include_tasks:
+    file: server.yml
+  tags: [ 'install-nfs' ]
+  when: "'nfsd' in group_names"
+
+- name: Install client
+  ansible.builtin.include_tasks:
+    file: client.yml
+  tags: [ 'mount-nfs' ]
+  when: "'compute' in group_names"

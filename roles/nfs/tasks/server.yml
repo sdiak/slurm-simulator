@@ -1,0 +1,30 @@
+- name: Install nfs server
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ os_vars[ansible_facts['os_family']]['nfs']['server-package'] }}"
+
+- name: Enable nfs-server service
+  ansible.builtin.service:
+    name: "{{ os_vars[ansible_facts['os_family']]['nfs']['server-service'] }}"
+    enabled: yes
+    state: started
+  
+- name: "Creates /etc/exports"
+  ansible.builtin.template:
+    src: exports.jinja2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "nfs-exportfs"
+
+- name: "Root ssh key : generate"
+  command: 
+    cmd: ssh-keygen -t ed25519 -C "root" -P "" -f ~/.ssh/id_ed25519
+    creates: /root/.ssh/id_ed25519
+  notify: "allow-root-ssh-key"
+
+
+- name: Flush handlers
+  meta: flush_handlers

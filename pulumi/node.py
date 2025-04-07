@@ -30,8 +30,11 @@ class Node:
     networks: set[Network] = field(default_factory=set)
     """ The network that this node is connected to """
 
-    cpus: int = 4
-    """ The number of virtual CPU """
+    sockets: int = 2
+    """ The number of virtual Sockets """
+
+    cpus_per_socket: int = 2
+    """ The number of virtual CPU per socket """
     
     mem_gb: float = 1
     """ The amount of RAM in Gigabyte """
@@ -45,6 +48,9 @@ class Node:
     def __post_init__(self):
         common.check_identifier(self.name, "node name")
         map(common.check_identifier, self.roles)
+
+    def total_cpus(self) -> int:
+        return self.sockets * self.cpus_per_socket
 
     def get_nics(self, cluster_name: str, admin_net: Network) -> list[dict[str, Any]]:
         nics = []
