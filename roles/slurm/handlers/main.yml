@@ -1,0 +1,7 @@
+
+- name: enable-munge-service
+  ansible.builtin.service:
+    name: munge
+    state: restarted
+    enabled: yes
+  listen: "enable-munge-service"

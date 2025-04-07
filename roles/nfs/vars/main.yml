@@ -2,6 +2,7 @@ nfs:
   exports:
     - /home
     - /root
+    - /etc/slurm
 
 os_vars:
   RedHat:

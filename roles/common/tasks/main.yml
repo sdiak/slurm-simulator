@@ -9,7 +9,15 @@
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  with_items: [ "vim" ]
+  with_items: [ "vim", "libuser" ]
+
+- name: Install RedHat packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items: [ "epel-release" ]
+  when: ansible_facts['os_family'] == "RedHat"
+
 
 - name: "Creates /root/.ssh/config"
   ansible.builtin.template:
@@ -18,3 +26,9 @@
     owner: root
     group: root
     mode: "0640"
+
+
+- name: Install pdsh
+  ansible.builtin.include_tasks:
+    file: pdsh.yml
+  tags: [ 'install-pdsh' ]

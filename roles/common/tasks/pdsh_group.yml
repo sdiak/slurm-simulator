@@ -1,0 +1,8 @@
+
+- name: "Creates /etc/dsh/group/{{ group_name }}"
+  ansible.builtin.template:
+    src: pdsh-group.jinja2
+    dest: /etc/dsh/group/{{ group_name }}
+    owner: root
+    group: root
+    mode: "0644"

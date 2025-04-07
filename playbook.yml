@@ -4,4 +4,8 @@
 
 - hosts: all
   roles:
+    - role: 'slurm'
+
+- hosts: all
+  roles:
     - role: 'nfs'

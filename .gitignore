@@ -1,4 +1,6 @@
 venv/
 __pycache__/
+*.rpm
+*.deb
 *.pyc
 Pulumi.*.yaml

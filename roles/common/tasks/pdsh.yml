@@ -1,0 +1,30 @@
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ os_vars[ansible_facts['os_family']]['pdsh']['packages'] }}"
+
+
+- name: Configure PDSH_RCMD_TYPE
+  ansible.builtin.copy:
+    src: pdsh.sh
+    dest: /etc/profile.d/pdsh.sh
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "Create /etc/dsh/group"
+  ansible.builtin.file:
+    path: /etc/dsh/group
+    state: directory
+    owner: root
+    group: root
+    mode: '0775'
+
+- include_tasks: pdsh_group.yml
+  loop:
+    - all
+    - compute
+  loop_control:
+    loop_var: group_name

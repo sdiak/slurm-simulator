@@ -26,6 +26,16 @@ def main():
     cluster.add_node(Node(name="rocky01", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], mem_gb=1, roles={'compute'}))
     cluster.add_node(Node(name="rocky02", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], mem_gb=1, roles={'compute'}))
 
+    groups: dict[str,set] = dict(all=set())
+    for node in cluster.nodes.values():
+        groups['all'].add(node.name)
+        for role in node.roles:
+            if role in groups:
+                groups[role].add(node.name)
+            else:
+                groups[role] = { node.name }
+    for node in cluster.nodes.values():
+        node.ansible_vars['all_groups'] = groups
     virsh.build(cluster)
     pulumi.export("cluster", cluster.output)
     

@@ -34,3 +34,9 @@ pulumi config set base-image-pool default
 # Configure the pool for node volumes (default: "default")
 pulumi config set node-pool default
 ```
+
+Install ansible dependencies :
+
+```shell
+ansible-galaxy collection install ansible.posix
+```

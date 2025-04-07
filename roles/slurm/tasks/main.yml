@@ -1,0 +1,45 @@
+- name: Copy RPMs to "/tmp"
+  ansible.posix.synchronize:
+    src: rpms/
+    dest: /tmp/slurm_rpms/
+    recursive: true
+    use_ssh_args: true
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Copy DEBs to "/tmp"
+  ansible.posix.synchronize:
+    src: debs/
+    dest: /tmp/slurm_debs/
+    recursive: true
+    use_ssh_args: true
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Install munge
+  ansible.builtin.package:
+    name: munge
+    state: present
+
+- name: Copy munge key to /etc/munge/munge.key
+  ansible.builtin.copy:
+    src: munge.key
+    dest: /etc/munge/munge.key
+    owner: munge
+    group: root
+    mode: '0600'
+  notify: enable-munge-service
+
+- name: "Create slurm user"
+  ansible.builtin.user:
+    name: slurm
+    system: true
+    create_home: false
+    local: true
+    uid: 444
+
+- name: "Create /etc/slurm"
+  ansible.builtin.file:
+    path: /etc/slurm
+    state: directory
+    owner: slurm
+    group: root
+    mode: '0775'

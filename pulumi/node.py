@@ -45,6 +45,9 @@ class Node:
     os: Os = Os.ROCKY_8_10
     """ The operating system """
 
+    ansible_vars: dict[str, Any] = field(default_factory=dict)
+    """ Ansible variables """
+
     def __post_init__(self):
         common.check_identifier(self.name, "node name")
         map(common.check_identifier, self.roles)

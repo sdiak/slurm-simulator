@@ -1,0 +1,9 @@
+
+os_vars:
+  RedHat:
+    pdsh:
+      packages: [ "pdsh", "pdsh-mod-dshgroup", "pdsh-rcmd-ssh" ]
+
+  Debian:
+    pdsh:
+      packages: [ "pdsh" ]
