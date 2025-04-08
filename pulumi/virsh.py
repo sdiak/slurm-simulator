@@ -171,7 +171,7 @@ def __build_domain(cluster: Cluster, node: Node):
         ],
     )
     cluster.output['hosts'].append(dict(
-        name=node.name, roles=list(node.roles), ansible_vars=node.ansible_vars,
+        name=node.name, roles=list(map(lambda n: n.value, node.roles)), ansible_vars=node.ansible_vars,
         libvirt=dict(name=dom.name, network_interfaces=dom.network_interfaces)
     ))
 

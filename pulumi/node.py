@@ -19,6 +19,20 @@ class Os(Enum):
     def is_rhel(self) -> bool:
         return self in (Os.ROCKY_8_10, )
 
+
+class NodeRole(Enum):
+    SLURMCTLD = 'slurmctld'
+    ''' The slurm controller '''
+
+    NFSD = 'nfsd'
+    ''' The nfs server '''
+
+    LOGIN = 'login'
+    ''' A login node '''
+
+    COMPUTE = 'compute'
+    ''' A compute node '''
+
 @dataclass
 class Node:
     """ A cluster node
@@ -27,7 +41,7 @@ class Node:
     name: str
     """ Node name """
 
-    networks: set[Network] = field(default_factory=set)
+    networks: list[Network] = field(default_factory=list)
     """ The network that this node is connected to """
 
     sockets: int = 2
@@ -39,7 +53,7 @@ class Node:
     mem_gb: float = 1
     """ The amount of RAM in Gigabyte """
 
-    roles: set[str] = field(default_factory=set)
+    roles: set[NodeRole] = field(default_factory=set)
     """ The set of roles """
 
     os: Os = Os.ROCKY_8_10
@@ -50,7 +64,6 @@ class Node:
 
     def __post_init__(self):
         common.check_identifier(self.name, "node name")
-        map(common.check_identifier, self.roles)
 
     def total_cpus(self) -> int:
         return self.sockets * self.cpus_per_socket

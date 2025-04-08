@@ -4,7 +4,7 @@ from collections import OrderedDict
 import pulumi
 
 import common
-from network import Network
+from network import Network, NetworkRole
 from node import Node
 from user import User
 
@@ -41,19 +41,18 @@ class Cluster:
     def __post_init__(self):
         common.check_identifier(self.name, "cluster name")
 
-    def add_network(self, network: Network, admin: bool = False):
+    def add_network(self, network: Network):
         """Add a network to this cluster
 
         Args:
             network (Network): The network
-            admin (bool): Is this the administration network
 
         Raises:
             ValueError: when the network is invalid
         """
         if len(self.nodes) > 0:
             raise ValueError("Networks can not be added after nodes are defined")
-        if admin and self.__admin_network is not None:
+        if network.role == NetworkRole.ADMIN and self.__admin_network is not None:
             raise ValueError("Only one admin network can be defined")
         if network.name in self.networks:
             raise ValueError(f"Duplicate network name {network.name}")
@@ -61,7 +60,7 @@ class Cluster:
             if net.address.overlaps(network.address):
                 raise ValueError(f"{network.name}:{network.address} overlaps with existing {net.name}:{net.address}")
         self.networks[network.name] = network
-        if admin:
+        if network.role == NetworkRole.ADMIN:
             self.__admin_network = network
     
     def admin_network(self) -> Network:

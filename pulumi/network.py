@@ -1,8 +1,19 @@
 from dataclasses import dataclass, field
+from enum import Enum
 import ipaddress
 import pulumi_libvirt as pulibvirt
 
 import common
+
+class NetworkRole(Enum):
+    ADMIN = 'admin'
+    ''' The administrative network '''
+
+    STORAGE = 'storage'
+    ''' The storage network '''
+
+    FABRIC = 'fabric'
+    ''' A fabric network '''
 
 @dataclass(eq=True)
 class Network:
@@ -10,7 +21,7 @@ class Network:
     """
     sort_index: str = field(init=False, repr=False)
 
-    name: str
+    role: NetworkRole
     """ The network name """
 
     address: ipaddress.IPv4Network
@@ -36,3 +47,7 @@ class Network:
     
     def dns_server(self) -> str:
         return str(self.address[1])
+    
+    @property
+    def name(self) -> str:
+        return self.role.value
