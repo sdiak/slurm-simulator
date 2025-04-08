@@ -38,10 +38,12 @@ ansible-playbook playbook.yml
 
 At the end of the playbook, you have a cluster configured with :
 
-- slurm,
+- Slurm :
     - accounting: slurmdbd+mariadb,
     - cgroup v2
-- pdsh,
+- pdsh :
+    - `pdsh -g all uname -r | dshbak -c` : get kernel version on all nodes,
+    - `pdsh -g compute uname -r | dshbak -c` : get kernel version on compute nodes.
 - nfs for home folder and slurm conf.
 
 Every node should be up and all compute node should be `IDLE` in the **all** partition.
