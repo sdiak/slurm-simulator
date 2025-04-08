@@ -68,7 +68,7 @@ pulumi down
 I sometimes have to setup very complex Slurm configuration and plugins for my clients.\
 I have created a private pulumi project for this purpose and used it to test various solutions to solve my issues without requiring a baremetal cluster.
 
-I have know decided to clean up the code and make public for every sys-admin that might need it.
+I have now decided to clean up the code and make public for every sys-admin that might need it.
 
 ## The documentation is lacking
 
