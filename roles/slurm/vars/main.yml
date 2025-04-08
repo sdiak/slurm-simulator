@@ -1,2 +1,5 @@
 
 slurm_version: "24.05.7-1"
+mariadb_password: "dmld!5-mm"
+mariadb_user: "slurm"
+mariadb_database: "slurm_acct_db"

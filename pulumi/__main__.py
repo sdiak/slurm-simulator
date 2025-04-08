@@ -37,6 +37,7 @@ def main() -> None:
                 groups[group] = { node.name }
     for node in cluster.nodes.values():
         node.ansible_vars['all_groups'] = groups
+        node.ansible_vars['cluster_name'] = cluster.name
     virsh.build(cluster)
     pulumi.export("cluster", cluster.output)
     

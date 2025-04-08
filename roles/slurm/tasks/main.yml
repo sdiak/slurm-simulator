@@ -1,3 +1,8 @@
+- name: Setting primary_controller
+  ansible.builtin.set_fact:
+    slurmctld_primary: "{{ inventory_hostname }}"
+    delegate_to: "{{ groups['slurmctld'][0] }}"
+
 - name: Copy RPMs to "/tmp"
   ansible.posix.synchronize:
     src: rpms/
@@ -64,3 +69,17 @@
   with_items:
     - slurm-smd
     - slurm-smd-dev
+
+- name: "Generate /etc/slurm/slurm.conf"
+  ansible.builtin.template:
+    src: slurm.conf.jinja2
+    dest: /etc/slurm/slurm.conf
+    owner: slurm
+    group: root
+    mode: "0664"
+  when: "'nfsd' in group_names"
+
+- name: Install slurmdbd
+  ansible.builtin.include_tasks:
+    file: slurmdbd.yml
+  when: "inventory_hostname == slurmctld_primary or 'nfsd' in group_names"

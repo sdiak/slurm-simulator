@@ -1,0 +1,38 @@
+- name: "Create slurm user and database"
+  command: mysql -u root
+  args:
+    stdin: "create database {{ mariadb_database }}; grant all on {{ mariadb_database }}.* TO '{{ mariadb_user }}'@'localhost' identified by '{{ mariadb_password }}' with grant option;"
+  register: mysql_cli_out
+  when: "'slurmctld' in group_names"
+  changed_when: mysql_cli_out.rc == 0
+  failed_when:
+    - mysql_cli_out.rc != 0
+    - '"ERROR 1007" not in mysql_cli_out.stderr'
+  notify: enable-slurmdbd-service
+
+- name: "Install packages"
+  ansible.builtin.dnf:
+    name:
+      - "/tmp/slurm_rpms/slurm-slurmdbd-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+    state: present
+    disable_gpg_check: true
+  when: "ansible_facts['os_family'] == 'RedHat' and 'slurmctld' in group_names"
+
+- name: "Install slurm"
+  ansible.builtin.apt:
+    deb: "/tmp/slurm_debs/{{ item }}_{{ slurm_version }}_amd64.deb"
+    state: present
+    allow_unauthenticated: true
+  when: "ansible_facts['os_family'] == 'Debian' and 'slurmctld' in group_names"
+  with_items:
+    - slurm-smd-slurmdbd
+
+- name: "Generate /etc/slurm/slurmdbd.conf"
+  ansible.builtin.template:
+    src: slurmdbd.conf.jinja2
+    dest: /etc/slurm/slurmdbd.conf
+    owner: slurm
+    group: root
+    mode: "0600"
+  when: "'nfsd' in group_names"
+  notify: enable-slurmdbd-service

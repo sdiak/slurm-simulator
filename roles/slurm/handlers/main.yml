@@ -5,3 +5,10 @@
     state: restarted
     enabled: yes
   listen: "enable-munge-service"
+
+- name: enable-slurmdbd-service
+  ansible.builtin.service:
+    name: slurmdbd
+    state: restarted
+    enabled: yes
+  listen: "enable-slurmdbd-service"
