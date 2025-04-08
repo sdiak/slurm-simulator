@@ -95,6 +95,6 @@ However feel free to derive some proper ansible roles and inventory for your nee
 
 ## Planned
 
-- Configured **slurmstepd**,
+- Configured **slurmrestd**,
 - Use the **storage** network for sharing `/home`,
 - Configured **OpenMPI** over the **fabric** network.
