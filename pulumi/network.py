@@ -13,7 +13,7 @@ class NetworkRole(Enum):
     ''' The storage network '''
 
     FABRIC = 'fabric'
-    ''' A fabric network '''
+    ''' The fabric network '''
 
 @dataclass(eq=True)
 class Network:
