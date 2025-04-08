@@ -29,12 +29,6 @@ cd ..
 
 # Configuring the nodes
 
-You need to provide the compiled slurm packages :
-
-- if you have **Rocky Linux** nodes in your cluster, add the `slurm-*.rpm` to [./roles/slurm/files/rpms](https://github.com/sdiak/slurm-simulator/tree/98d9981571332d54c9bf69af114e83c52685c9cb/roles/slurm/files/rpms)
-- if you have **Ubuntu** nodes in your cluster, add the `slurm-smd*.deb` to [./roles/slurm/files/debs](https://github.com/sdiak/slurm-simulator/tree/98d9981571332d54c9bf69af114e83c52685c9cb/roles/slurm/files/debs)
-
-You can use the [sdiak/slurm-compiler](https://github.com/sdiak/slurm-compiler) to compile for **rocky** and/or **ubuntu**.
 
 Run the ansible playbook
 ```shell
