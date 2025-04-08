@@ -4,7 +4,7 @@ slurm-simulator
 Simulate a cluster to help you test various Slurm settings
 
 
-# Boostrap
+# Bootstrap
 
 To use this project you have to install and initialize **Pulumi** see [./doc/bootstrap.md](./doc/bootstrap.md)
 
