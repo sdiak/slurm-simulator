@@ -1,42 +1,47 @@
-# slurm-simulator
+slurm-simulator
+-----------------------
+
 Simulate a cluster to help you test various Slurm settings
 
 
-# Initial set-up
+# Boostrap
 
-Install dependencies :
+To use this project you have to install and initialize **Pulumi** see [./doc/bootstrap.md](./doc/bootstrap.md)
 
-[Download and install Pulumi](https://www.pulumi.com/docs/iac/download-install/)
 
-```shell
-# deb: sudo apt install libvirt-dev genisoimage
-# rhel: sudo dnf install libvirt-devel genisoimage
-cd pulumi
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+# Starting the cluster
 
-Create the pulumi stack :
+Configure your cluster in [pulumi/\_\_main\_\_.py](https://github.com/sdiak/slurm-simulator/blob/3fbbdd2db435a5550db914e4850e2009fae14ee0/pulumi/__main__.py#L15-L27)
 
 ```shell
 cd pulumi
-source venv/bin/activate
-pulumi login --local
-# Cluster name
-pulumi stack init test-cluster
-# Copy your public ssh-key to the cluster nodes
-pulumi config set ssh_pubkey "$(cat ~/.ssh/id_ed25519.pub)"
-# If your nodes needs a proxy, you can configure http_proxy
-# pulumi config set http_proxy http://my-proxy:8080
-# Configure the pool for cloud init images (default: "default")
-pulumi config set base-image-pool default
-# Configure the pool for node volumes (default: "default")
-pulumi config set node-pool default
+# Start the cluster
+pulumi up
+# `pulumi up` does not wait for cloud-init on rocky (if you know why; please open an issue), workaround :
+sleep 60s
+cd ..
 ```
 
-Install ansible dependencies :
+# Configuring the nodes
+
+Run the ansible playbook
+```shell
+ansible-playbook playbook.yml
+```
+
+At the end of the playbook, you have a cluster configured with :
+
+- slurm,
+- pdsh,
+- nfs for home folder and slurm conf.
+
+Every node should be up and all compute node should be `IDLE` in the **all** partition.
+
+You can now experiment with various slurm settings to solve your issue.
+
+# Destroying the cluster
 
 ```shell
-ansible-galaxy collection install ansible.posix
+cd pulumi
+pulumi down
 ```
