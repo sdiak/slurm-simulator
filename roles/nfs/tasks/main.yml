@@ -1,8 +1,4 @@
 
-- name: Setting server name
-  ansible.builtin.set_fact:
-    nfs_server: "{{ groups['nfsd'][0] }}"
-
 - name: Install server
   ansible.builtin.include_tasks:
     file: server.yml

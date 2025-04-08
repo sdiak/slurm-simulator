@@ -1,3 +1,9 @@
+- name: Enable nfs-server service
+  ansible.builtin.service:
+    name: "{{ os_vars[ansible_facts['os_family']]['nfs']['server-service'] }}"
+    enabled: yes
+    state: restarted
+  listen: "nfs-exportfs"
 
 - name: nfs-exportfs
   command: exportfs -arv

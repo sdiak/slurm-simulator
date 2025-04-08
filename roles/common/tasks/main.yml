@@ -1,3 +1,10 @@
+- name: Setting Slurm primary_controller
+  ansible.builtin.set_fact:
+    slurmctld_primary: "{{ groups['slurmctld'][0] }}"
+
+- name: Setting NFS server name
+  ansible.builtin.set_fact:
+    nfs_server: "{{ groups['nfsd'][0] }}"
 
 - name: Wait for cloud-init to finish
   command: cloud-init status --wait
@@ -18,15 +25,31 @@
   with_items: [ "epel-release" ]
   when: ansible_facts['os_family'] == "RedHat"
 
+- name: "Create slurm user"
+  ansible.builtin.user:
+    name: slurm
+    system: true
+    create_home: false
+    local: true
+    uid: 444
+
+- name: "Create /etc/slurm"
+  ansible.builtin.file:
+    path: /etc/slurm
+    state: directory
+    owner: slurm
+    group: root
+    mode: '0775'
+
 - name: Enable powertools repository
   ansible.builtin.command: yum config-manager --set-enabled powertools
   changed_when: false
-  when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] == 8
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] == '8'
 
 - name: Enable powertools repository
   ansible.builtin.command: yum config-manager --set-enabled crb
   changed_when: false
-  when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] == 9
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] == '9'
 
 - name: "Creates /root/.ssh/config"
   ansible.builtin.template:

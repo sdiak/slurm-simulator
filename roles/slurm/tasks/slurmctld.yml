@@ -1,0 +1,27 @@
+
+- name: "Create /var/spool/slurmctld"
+  ansible.builtin.file:
+    path: /var/spool/slurmctld
+    state: directory
+    owner: slurm
+    group: root
+    mode: '0770'
+  when: "'slurmctld' in group_names"
+  notify: enable-slurmctld-service
+
+- name: "Install packages"
+  ansible.builtin.dnf:
+    name:
+      - "/tmp/slurm_rpms/slurm-slurmctld-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+    state: present
+    disable_gpg_check: true
+  when: "ansible_facts['os_family'] == 'RedHat' and 'slurmctld' in group_names"
+  notify: enable-slurmctld-service
+
+- name: "Install packages"
+  ansible.builtin.apt:
+    deb: "/tmp/slurm_debs/slurm-smd-slurmctld_{{ slurm_version }}_amd64.deb"
+    state: present
+    allow_unauthenticated: true
+  when: "ansible_facts['os_family'] == 'Debian' and 'slurmctld' in group_names"
+  notify: enable-slurmctld-service

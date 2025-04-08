@@ -9,7 +9,8 @@
     name: "{{ os_vars[ansible_facts['os_family']]['nfs']['server-service'] }}"
     enabled: yes
     state: started
-  
+
+
 - name: "Creates /etc/exports"
   ansible.builtin.template:
     src: exports.jinja2

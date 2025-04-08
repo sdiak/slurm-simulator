@@ -17,15 +17,15 @@
     state: present
     disable_gpg_check: true
   when: "ansible_facts['os_family'] == 'RedHat' and 'slurmctld' in group_names"
+  notify: enable-slurmdbd-service
 
-- name: "Install slurm"
+- name: "Install packages"
   ansible.builtin.apt:
-    deb: "/tmp/slurm_debs/{{ item }}_{{ slurm_version }}_amd64.deb"
+    deb: "/tmp/slurm_debs/slurm-smd-slurmdbd_{{ slurm_version }}_amd64.deb"
     state: present
     allow_unauthenticated: true
   when: "ansible_facts['os_family'] == 'Debian' and 'slurmctld' in group_names"
-  with_items:
-    - slurm-smd-slurmdbd
+  notify: enable-slurmdbd-service
 
 - name: "Generate /etc/slurm/slurmdbd.conf"
   ansible.builtin.template:

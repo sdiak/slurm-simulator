@@ -11,4 +11,29 @@
     name: slurmdbd
     state: restarted
     enabled: yes
+  when: "inventory_hostname == slurmctld_primary"
   listen: "enable-slurmdbd-service"
+
+- name: enable-slurmctld-service
+  ansible.builtin.service:
+    name: slurmctld
+    state: restarted
+    enabled: yes
+  listen: "enable-slurmctld-service"
+
+- name: enable-slurmrestd-service
+  ansible.builtin.systemd:
+    name: slurmrestd
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  listen: "enable-slurmrestd-service"
+
+- name: enable-slurmd-service
+  ansible.builtin.systemd:
+    name: slurmd
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  when: "'compute' in group_names"
+  listen: "enable-slurmd-service"

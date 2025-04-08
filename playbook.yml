@@ -10,9 +10,9 @@
 - hosts: all
   gather_facts: false
   roles:
-    - role: 'slurm'
+    - role: 'nfs'
 
 - hosts: all
   gather_facts: false
   roles:
-    - role: 'nfs'
+    - role: 'slurm'

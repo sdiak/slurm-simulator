@@ -1,8 +1,3 @@
-- name: Setting primary_controller
-  ansible.builtin.set_fact:
-    slurmctld_primary: "{{ inventory_hostname }}"
-    delegate_to: "{{ groups['slurmctld'][0] }}"
-
 - name: Copy RPMs to "/tmp"
   ansible.posix.synchronize:
     src: rpms/
@@ -33,23 +28,6 @@
     mode: '0600'
   notify: enable-munge-service
 
-- name: "Create slurm user"
-  ansible.builtin.user:
-    name: slurm
-    system: true
-    create_home: false
-    local: true
-    uid: 444
-
-- name: "Create /etc/slurm"
-  ansible.builtin.file:
-    path: /etc/slurm
-    state: directory
-    owner: slurm
-    group: root
-    mode: '0775'
-
-
 - name: "Install slurm"
   ansible.builtin.dnf:
     name:
@@ -79,7 +57,30 @@
     mode: "0664"
   when: "'nfsd' in group_names"
 
+- name: "Create /etc/slurm/state"
+  ansible.builtin.file:
+    path: /etc/slurm/state
+    state: directory
+    owner: slurm
+    group: root
+    mode: '0770'
+  when: "'nfsd' in group_names"
+
+- name: "Create /etc/slurm/logs"
+  ansible.builtin.file:
+    path: /etc/slurm/logs
+    state: directory
+    owner: slurm
+    group: root
+    mode: '0775'
+  when: "'nfsd' in group_names"
+
 - name: Install slurmdbd
   ansible.builtin.include_tasks:
     file: slurmdbd.yml
   when: "inventory_hostname == slurmctld_primary or 'nfsd' in group_names"
+
+- name: Install slurmctld
+  ansible.builtin.include_tasks:
+    file: slurmctld.yml
+  when: "'slurmctld' in group_names or 'nfsd' in group_names"
