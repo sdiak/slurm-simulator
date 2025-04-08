@@ -1,6 +1,13 @@
 Initial set-up
 -------------------------
 
+You will need an access to a libvirt install, you can :
+
+- already have access to a libvirt install,
+    - I sometime use this project on my work shared libvirt server. 
+- install it on your laptop :
+    - I sometime use this project on my Ubuntu 24.04 laptop : [Install on Ubuntu](https://documentation.ubuntu.com/server/how-to/virtualisation/libvirt/)
+
 Install dependencies :
 
 [Download and install Pulumi](https://www.pulumi.com/docs/iac/download-install/)
