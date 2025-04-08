@@ -1,0 +1,49 @@
+
+- name: "Create /var/spool/slurmd"
+  ansible.builtin.file:
+    path: /var/spool/slurmd
+    state: directory
+    owner: slurm
+    group: root
+    mode: '0755'
+  notify: enable-slurmd-service
+
+- name: "Install packages"
+  ansible.builtin.dnf:
+    name:
+      - "/tmp/slurm_rpms/slurm-slurmd-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+      - "/tmp/slurm_rpms/slurm-slurmdbd-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+    state: present
+    disable_gpg_check: true
+  when: "ansible_facts['os_family'] == 'RedHat'"
+  notify: enable-slurmd-service
+
+- name: "Install packages"
+  ansible.builtin.apt:
+    deb: "/tmp/slurm_debs/{{ item }}_{{ slurm_version }}_amd64.deb"
+    state: present
+    allow_unauthenticated: true
+  when: "ansible_facts['os_family'] == 'Debian'"
+  notify: enable-slurmd-service
+  with_items:
+    - slurm-smd-slurmd
+    - slurm-smd-libpam-slurm-adopt
+
+- name: Install slurmd_prestart to fix cgroup env at boot time
+  ansible.builtin.copy:
+    src: slurmd_prestart
+    dest: /usr/local/sbin/slurmd_prestart
+    owner: root
+    group: root
+    mode: '0770'
+  notify: "enable-slurmd-service"
+  
+- name: Insert slurmd_prestart in /usr/lib/systemd/system/slurmd.service
+  ansible.builtin.lineinfile:
+    path: /usr/lib/systemd/system/slurmd.service
+    regexp: '^ExecStartPre='
+    insertbefore: '^ExecStart='
+    line: 'ExecStartPre=/usr/local/sbin/slurmd_prestart'
+  notify: "enable-slurmd-service"
+
+

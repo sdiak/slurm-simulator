@@ -2,60 +2,8 @@
 ClusterName={{ cluster_name }}
 SlurmctldHost={{ slurmctld_primary }}
 
+AuthType=auth/munge
 
-MpiDefault=none
-#Epilog=/etc/slurm/epilog.sh
-ProctrackType=proctrack/cgroup
-
-ReturnToService=1
-SlurmctldPidFile=/var/run/slurmctld.pid
-SlurmctldPort=6817
-SlurmdPidFile=/var/run/slurmd.pid
-SlurmdPort=6818
-SlurmdSpoolDir=/var/spool/slurmd
-SlurmUser=slurm
 
 StateSaveLocation=/etc/slurm/state
-SwitchType=switch/none
-TaskPlugin=task/cgroup,task/affinity
 
-InactiveLimit=0
-KillWait=30
-MinJobAge=300
-SlurmctldTimeout=120
-SlurmdTimeout=300
-
-# SCHEDULING
-MaxMemPerCPU=1024
-SchedulerType=sched/backfill
-SelectType=select/cons_tres
-SelectTypeParameters=CR_Socket_Memory # needed for memory limit enforcement in cgroup
-
-# Preemption
-PreemptType=preempt/partition_prio
-PreemptMode=requeue
-JobRequeue=1
-
-# Other
-#ResvProlog=/root/resv_prolog.sh
-#ResvEpilog=/root/resv_epilog.sh
-#CliFilterPlugins=cli_filter/lua
-
-
-# LOGGING AND ACCOUNTING
-AccountingStorageEnforce=qos,limits
-AccountingStorageHost={{ slurmctld_primary }}
-AccountingStorageType=accounting_storage/slurmdbd
-#AccountingStorageTRES=license/testlic1
-JobCompType=jobcomp/none
-JobAcctGatherFrequency=30
-JobAcctGatherType=jobacct_gather/cgroup
-SlurmctldDebug=info
-SlurmctldLogFile=/etc/slurm/logs/slurmctld.log
-SlurmdDebug=info
-SlurmdLogFile=/etc/slurm/logs/slurmd.%n.log
-
-
-#JobSubmitPlugins=lua
-
-EnforcePartLimits=ANY

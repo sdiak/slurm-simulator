@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "+cpu" >> /sys/fs/cgroup/cgroup.subtree_control
+echo "+cpuset" >> /sys/fs/cgroup/cgroup.subtree_control
+echo "+cpu" >> /sys/fs/cgroup/system.slice/cgroup.subtree_control
+echo "+cpuset" >> /sys/fs/cgroup/system.slice/cgroup.subtree_control
