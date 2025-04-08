@@ -68,6 +68,16 @@ class Node:
     def total_cpus(self) -> int:
         return self.sockets * self.cpus_per_socket
 
+    def slurm_def(self) -> dict[str, Any]:
+        return dict(
+            name=self.name,
+            cpus=self.sockets * self.cpus_per_socket,
+            sockets=self.sockets,
+            cpus_per_socket=self.cpus_per_socket,
+            real_memory=int(self.mem_gb * 1024 * 0.7),
+        )
+
+
     def get_nics(self, cluster_name: str, admin_net: Network) -> list[dict[str, Any]]:
         nics = []
         i = self.os.value.nic_offset

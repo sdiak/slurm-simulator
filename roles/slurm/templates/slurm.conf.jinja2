@@ -42,13 +42,13 @@ JobRequeue=1
 
 
 # LOGGING AND ACCOUNTING
-#AccountingStorageEnforce=qos,limits
-#AccountingStorageHost={{ slurmctld_primary }}
-#AccountingStorageType=accounting_storage/slurmdbd
-##AccountingStorageTRES=license/testlic1
-#JobCompType=jobcomp/none
-#JobAcctGatherFrequency=30
-#JobAcctGatherType=jobacct_gather/cgroup
+AccountingStorageEnforce=qos,limits
+AccountingStorageHost={{ slurmctld_primary }}
+AccountingStorageType=accounting_storage/slurmdbd
+#AccountingStorageTRES=license/testlic1
+JobCompType=jobcomp/none
+JobAcctGatherFrequency=30
+JobAcctGatherType=jobacct_gather/cgroup
 SlurmctldDebug=info
 SlurmctldLogFile=/etc/slurm/logs/slurmctld.log
 SlurmdDebug=info
@@ -62,3 +62,14 @@ EnforcePartLimits=ANY
 
 AuthType=auth/munge
 
+{% for node in slurm_nodes %}
+NodeName={{ node.name }} CPUs={{ node.cpus }} Boards=1 SocketsPerBoard={{ node.sockets }} CoresPerSocket={{ node.cpus_per_socket }} ThreadsPerCore=1 RealMemory={{ node.real_memory }}
+{% endfor %}
+
+PartitionName=DEFAULT State=UP
+PartitionName=DEFAULT MaxTime=1-00
+PartitionName=DEFAULT OverSubscribe=NO
+PartitionName=DEFAULT PreemptMode=OFF
+PartitionName=DEFAULT MaxMemPerCPU=300
+
+PartitionName=all nodes={{ all_computes }}

@@ -100,7 +100,7 @@
     file: slurmctld.yml
   when: "'slurmctld' in group_names or 'nfsd' in group_names"
   
-# - name: Install slurmd
-#   ansible.builtin.include_tasks:
-#     file: slurmd.yml
-#   when: "'compute' in group_names"
+- name: Install slurmd
+  ansible.builtin.include_tasks:
+    file: slurmd.yml
+  when: "'compute' in group_names"

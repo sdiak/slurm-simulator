@@ -3,7 +3,7 @@
 """
 import pulumi
 import ipaddress
-
+from typing import Any
 
 import virsh
 from cluster import Cluster
@@ -27,7 +27,15 @@ def main() -> None:
     cluster.add_node(Node(name="rocky02", networks=[cluster.networks['admin'], cluster.networks['storage'], cluster.networks['fabric']], mem_gb=1, roles={NodeRole.COMPUTE}))
 
     groups: dict[str,set] = dict(all=set())
+    slurm_nodes: list[dict[str, Any]] = []
+    all_computes=''
     for node in cluster.nodes.values():
+        if NodeRole.COMPUTE in node.roles:
+            slurm_nodes.append(node.slurm_def())
+            if len(all_computes) == 0:
+                all_computes = node.name
+            else:
+                all_computes += "," + node.name
         groups['all'].add(node.name)
         for role in node.roles:
             group = role.value
@@ -35,9 +43,13 @@ def main() -> None:
                 groups[group].add(node.name)
             else:
                 groups[group] = { node.name }
+    
     for node in cluster.nodes.values():
         node.ansible_vars['all_groups'] = groups
         node.ansible_vars['cluster_name'] = cluster.name
+        node.ansible_vars['slurm_nodes'] = slurm_nodes
+        node.ansible_vars['all_computes'] = all_computes
+        
     virsh.build(cluster)
     pulumi.export("cluster", cluster.output)
     
