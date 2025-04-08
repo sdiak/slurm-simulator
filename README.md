@@ -29,6 +29,11 @@ cd ..
 
 # Configuring the nodes
 
+This project provide compiled slurm packages for :
+- RHEL (Rocky) 8.10
+- Ubuntu 24.04
+
+If you need to support other nodes OS, see [doc/compiling-slurm.md](./doc/compiling-slurm.md).
 
 Run the ansible playbook
 ```shell
