@@ -91,3 +91,10 @@ This is not the purpose of this project:
 - ...
 
 However feel free to derive some proper ansible roles and inventory for your needs.
+
+
+## Planned
+
+- Configured **slurmstepd**,
+- Use the **storage** network for sharing `/home`,
+- Configured **OpenMPI** over the **fabric** network.
