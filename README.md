@@ -32,6 +32,8 @@ ansible-playbook playbook.yml
 At the end of the playbook, you have a cluster configured with :
 
 - slurm,
+    - accounting: slurmdbd+mariadb,
+    - cgroup v2
 - pdsh,
 - nfs for home folder and slurm conf.
 
