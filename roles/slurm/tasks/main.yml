@@ -43,3 +43,24 @@
     owner: slurm
     group: root
     mode: '0775'
+
+
+- name: "Install slurm"
+  ansible.builtin.dnf:
+    name:
+      - libaec
+      - "/tmp/slurm_rpms/slurm-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+      - "/tmp/slurm_rpms/slurm-devel-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+    state: present
+    disable_gpg_check: true
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "Install slurm"
+  ansible.builtin.apt:
+    deb: "/tmp/slurm_debs/{{ item }}_{{ slurm_version }}_amd64.deb"
+    state: present
+    allow_unauthenticated: true
+  when: ansible_facts['os_family'] == "Debian"
+  with_items:
+    - slurm-smd
+    - slurm-smd-dev

@@ -2,10 +2,17 @@
   roles:
     - role: 'common'
 
+- hosts: slurmctld
+  gather_facts: false
+  roles:
+    - role: 'mariadb'
+
 - hosts: all
+  gather_facts: false
   roles:
     - role: 'slurm'
 
 - hosts: all
+  gather_facts: false
   roles:
     - role: 'nfs'
