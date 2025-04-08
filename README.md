@@ -20,7 +20,8 @@ pulumi up
 # `pulumi up` does not wait for cloud-init on rocky (if you know why; please open an issue),
 # workaround :
 sleep 60s
-# check that every nodes as an ip (replace "test-cluster" with the name of your cluster that you defined in the bootstrap phase by "pulumi stack init test-cluster")
+# check that every nodes as an ip (replace "test-cluster" with the name of
+# your cluster that you defined in the bootstrap phase by "pulumi stack init test-cluster")
 virsh net-dhcp-leases test-cluster-admin
 # Back to the root of the project
 cd ..
