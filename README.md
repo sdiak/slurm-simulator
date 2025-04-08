@@ -95,6 +95,8 @@ However feel free to derive some proper ansible roles and inventory for your nee
 
 ## Planned
 
+The first tag should include :
+
 - Configured **slurmrestd**,
-- Use the **storage** network for sharing `/home`,
-- Configured **OpenMPI** over the **fabric** network.
+- Use of the **storage** network for sharing `/home`,
+- Configured **OpenMPI** over the **fabric** network with `srun` using it.
