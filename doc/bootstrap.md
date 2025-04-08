@@ -30,10 +30,8 @@ pulumi config set ssh_pubkey "$(cat ~/.ssh/id_ed25519.pub)"
 pulumi config set base-image-pool default
 # Configure the pool for node volumes (default: "default")
 pulumi config set node-pool default
-# You can set a custom libvirt uri :
-pulumi config set libvirt:uri "qemu+ssh://${hostname}/system?keyfile=${path_no_ssh_private_key_file}&no_tty=1"
-# or the default one beeing equivalent to :
-pulumi config set libvirt:uri "qemu:///system"
+# You can set a custom libvirt uri : (default: "qemu:///system")
+pulumi config set libvirt:uri "qemu+ssh://${hostname}/system?keyfile=${path_to_ssh_private_key_file}&no_tty=1"
 ```
 
 Install ansible dependencies :
