@@ -92,6 +92,14 @@ This is not the purpose of this project:
 
 However feel free to derive some proper ansible roles and inventory for your needs.
 
+## Why Pulumi
+
+My first slurm simulator was built using Terraform (OpenTofu wasn't born yet).
+
+The main advantage that I see for Pulumi is that I can use Python as a glue to :
+
+- easly define the cluster,
+- integrate the cluster as an ansible inventory.
 
 ## Planned
 
