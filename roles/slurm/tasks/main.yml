@@ -109,6 +109,12 @@
 - name: Flush handlers
   meta: flush_handlers
 
+- name: Install slurmrestd
+  ansible.builtin.include_tasks:
+    file: slurmrestd.yml
+  tags: [ 'install-slurmrestd' ]
+  when: "'slurmctld' in group_names"
+
 - name: Install slurmd
   ansible.builtin.include_tasks:
     file: slurmd.yml
