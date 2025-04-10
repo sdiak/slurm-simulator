@@ -90,16 +90,25 @@
     - slurm-smd-dev
     - slurm-smd-client
 
+- name: Flush handlers
+  meta: flush_handlers
+
 - name: Install slurmdbd
   ansible.builtin.include_tasks:
     file: slurmdbd.yml
   when: "inventory_hostname == slurmctld_primary or 'nfsd' in group_names"
+
+- name: Flush handlers
+  meta: flush_handlers
 
 - name: Install slurmctld
   ansible.builtin.include_tasks:
     file: slurmctld.yml
   when: "'slurmctld' in group_names or 'nfsd' in group_names"
   
+- name: Flush handlers
+  meta: flush_handlers
+
 - name: Install slurmd
   ansible.builtin.include_tasks:
     file: slurmd.yml

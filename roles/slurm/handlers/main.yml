@@ -1,13 +1,13 @@
 
 - name: enable-munge-service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: munge
     state: restarted
     enabled: yes
   listen: "enable-munge-service"
 
 - name: enable-slurmdbd-service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: slurmdbd
     state: restarted
     enabled: yes
@@ -15,7 +15,7 @@
   listen: "enable-slurmdbd-service"
 
 - name: enable-slurmctld-service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: slurmctld
     state: restarted
     enabled: yes
@@ -37,3 +37,7 @@
     daemon_reload: true
   when: "'compute' in group_names"
   listen: "enable-slurmd-service"
+
+- name: create-slurm-users-and-accounts
+  command: /tmp/create_slurm_users_and_accounts
+  listen: "create-slurm-users-and-accounts"

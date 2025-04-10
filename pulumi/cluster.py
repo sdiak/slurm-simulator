@@ -109,6 +109,6 @@ class Cluster:
         if ssh_pubkey is not None:
             user.ssh_authorized_keys.append(ssh_pubkey)
         self.users[user.name] = user
-        self.groups |= user.groups
+        self.groups.update(user.groups)
 
 

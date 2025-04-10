@@ -5,7 +5,7 @@
   loop: "{{ os_vars[ansible_facts['os_family']]['nfs']['server-package'] }}"
 
 - name: Enable nfs-server service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: "{{ os_vars[ansible_facts['os_family']]['nfs']['server-service'] }}"
     enabled: yes
     state: started

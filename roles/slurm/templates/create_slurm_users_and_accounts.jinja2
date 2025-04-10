@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -euo pipefail
+
+{% for group in wlm.groups %}
+sacctmgr -i add account name="{{ group }}"
+{% endfor %}
+
+{% for user in wlm.users %}
+{% if user.groups|length > 0 %}
+sacctmgr -i add user name="{{ user.name }}" accounts="{{ user.groups|join(',') }}" defaultaccount="{{ user.default_group }}"
+{% endif %}
+{% endfor %}

@@ -1,5 +1,5 @@
 - name: enable-mariadb-service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: mariadb
     state: restarted
     enabled: yes

@@ -25,3 +25,14 @@
     allow_unauthenticated: true
   when: "ansible_facts['os_family'] == 'Debian' and 'slurmctld' in group_names"
   notify: enable-slurmctld-service
+
+- name: "Generate /tmp/create_slurm_users_and_accounts"
+  ansible.builtin.template:
+    src: create_slurm_users_and_accounts.jinja2
+    dest: /tmp/create_slurm_users_and_accounts
+    owner: root
+    group: root
+    mode: "0750"
+  when: "inventory_hostname == slurmctld_primary"
+  notify:
+    - create-slurm-users-and-accounts
