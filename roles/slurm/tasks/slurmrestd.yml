@@ -1,0 +1,59 @@
+# To get the OpenAPI descriptor:  curl --unix-socket "/var/spool/slurmrestd/slurmrestd.socket" 'http://localhost:8080/openapi/v3'
+
+- name: "Create slurmrestd user"
+  ansible.builtin.user:
+    name: slurmrestd
+    system: true
+    create_home: false
+    local: true
+  tags: [ 'install-slurmrestd' ]
+
+- name: "Create /var/spool/slurmrestd"
+  ansible.builtin.file:
+    path: /var/spool/slurmrestd
+    state: directory
+    owner: slurmrestd
+    group: root
+    mode: '0770'
+  tags: [ 'install-slurmrestd' ]
+  notify: enable-slurmrestd-service
+
+- name: "Configure slurmrestd"
+  ansible.builtin.template:
+    src: slurmrestd.env.jinja2
+    dest: /etc/default/slurmrestd
+    owner: root
+    group: root
+    mode: "0660"
+  tags: [ 'install-slurmrestd' ]
+  notify: enable-slurmrestd-service
+
+
+- name: "Install packages"
+  ansible.builtin.dnf:
+    name:
+      - "/tmp/slurm_rpms/slurm-slurmrestd-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+    state: present
+    disable_gpg_check: true
+  when: "ansible_facts['os_family'] == 'RedHat'"
+  tags: [ 'install-slurmrestd' ]
+  notify: enable-slurmrestd-service
+
+- name: "Install packages"
+  ansible.builtin.apt:
+    deb: "/tmp/slurm_debs/slurm-smd-slurmrestd_{{ slurm_version }}_amd64.deb"
+    state: present
+    allow_unauthenticated: true
+  when: "ansible_facts['os_family'] == 'Debian'"
+  tags: [ 'install-slurmrestd' ]
+  notify: enable-slurmrestd-service
+
+
+- name: "Let /etc/default/slurmrestd setup connexion options"
+  ansible.builtin.lineinfile:
+    path: /usr/lib/systemd/system/slurmrestd.service
+    regexp: '^ExecStart='
+    line: 'ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS'
+  tags: [ 'install-slurmrestd' ]
+  notify: enable-slurmrestd-service
+# Original line is : ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS unix:/var/lib/slurmrestd.socket 0.0.0.0:6820
