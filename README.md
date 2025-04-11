@@ -108,5 +108,5 @@ The first tag should include :
 - ~~Configured **slurmrestd**~~,
 - ~~Create one slurm account per group~~,
 - ~~Create one slurm association per user/group membership~~,
-- Use of the **storage** network for sharing `/home`,
+- ~~Use of the **storage** network for sharing `/home`~~,
 - Configured **OpenMPI** over the **fabric** network with `srun` using it.
