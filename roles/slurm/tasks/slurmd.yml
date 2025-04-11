@@ -12,7 +12,7 @@
   ansible.builtin.dnf:
     name:
       - "/tmp/slurm_rpms/slurm-slurmd-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
-      - "/tmp/slurm_rpms/slurm-slurmdbd-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
+      - "/tmp/slurm_rpms/slurm-pam_slurm-{{ slurm_version }}.el{{ ansible_facts['distribution_major_version'] }}.x86_64.rpm"
     state: present
     disable_gpg_check: true
   when: "ansible_facts['os_family'] == 'RedHat'"
