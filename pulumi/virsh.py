@@ -88,6 +88,7 @@ def __libvirt_create_volume(cluster: Cluster, resource_name: str, img: OsImage) 
         resource_name=resource_name,
         name=resource_name,
         pool=cluster.config.get('node-pool', 'default'),
+        size=10*1024*1024*1024,
         **base_volume_ref
     )
 
