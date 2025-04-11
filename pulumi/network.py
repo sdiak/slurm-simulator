@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 import ipaddress
+from typing import Any
 import pulumi_libvirt as pulibvirt
 
 import common
@@ -47,6 +48,14 @@ class Network:
     
     def dns_server(self) -> str:
         return str(self.address[1])
+    
+    def to_ansible(self, cluster_name: str) -> dict[str, Any]:
+        return dict(
+            name=self.name,
+            role=self.role.value,
+            address=str(self.address),
+            domain=common.domain(cluster_name, self)
+        )
     
     @property
     def name(self) -> str:

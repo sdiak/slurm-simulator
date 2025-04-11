@@ -77,6 +77,9 @@ packages:
     - qemu-guest-agent
     - python3
 runcmd:
+    - ln -sf ../run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+    - sed -i 's/#Domains=.*/Domains={{ domains }}/' /etc/systemd/resolved.conf
+    - systemctl enable --now systemd-resolved
     - systemctl start qemu-guest-agent
     - systemctl restart systemd-sysctl
 {% if rhel %}

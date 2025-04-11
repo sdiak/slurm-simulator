@@ -40,7 +40,9 @@ def main() -> None:
     
 
 def populate_ansible_vars(cluster: Cluster):
-
+    networks: dict[str, dict[str, Any]] = {
+        net.role.value: net.to_ansible(cluster.name) for net in cluster.networks.values()
+    }
     groups: dict[str,set] = dict(all=set())
     slurm_nodes: list[dict[str, Any]] = []
     all_computes=''
@@ -65,6 +67,7 @@ def populate_ansible_vars(cluster: Cluster):
         node.ansible_vars['cluster_name'] = cluster.name
         node.ansible_vars['slurm_nodes'] = slurm_nodes
         node.ansible_vars['all_computes'] = all_computes
+        node.ansible_vars['networks'] = networks
         node.ansible_vars['wlm'] = wlm
     
 

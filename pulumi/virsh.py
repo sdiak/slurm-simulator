@@ -135,13 +135,14 @@ def __build_domain(cluster: Cluster, node: Node):
         num_nets=len(cluster.networks),
         rhel=node.os.is_rhel(),
         nics=node.get_nics(cluster.name, cluster.admin_network()),
+        domains=' '.join(cluster.domains())
     )
     if cluster.config.get('http_proxy') is not None:
         env['http_proxy'] = cluster.config.get('http_proxy')
     network_config = network_config_rendered(env)
     user_data = cloud_init_rendered(env)
     pulumi.log.debug(network_config)
-    pulumi.log.debug(user_data)
+    pulumi.log.info(user_data)
     cloud_init = pulibvirt.CloudInitDisk(
         resource_name=cluster.name + "-" + node.name + "-commoninit.iso",
         name=cluster.name + "-" + node.name + "-commoninit.iso",

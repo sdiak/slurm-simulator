@@ -37,6 +37,7 @@ class Cluster:
     __next_uid: int = field(repr=False, default=1000)
     __uids: set[int] = field(default_factory=set)
     __admin_network: Network|None = None
+    __domains: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         common.check_identifier(self.name, "cluster name")
@@ -62,7 +63,13 @@ class Cluster:
         self.networks[network.name] = network
         if network.role == NetworkRole.ADMIN:
             self.__admin_network = network
+            self.__domains.insert(0, common.domain(self.name, network))
+        else:
+            self.__domains.append(common.domain(self.name, network))
     
+    def domains(self) -> list[str]:
+        return self.__domains
+
     def admin_network(self) -> Network:
         if self.__admin_network is None:
             raise ValueError("The admin network is not defined")
