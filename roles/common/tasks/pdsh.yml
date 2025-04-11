@@ -28,3 +28,11 @@
     - compute
   loop_control:
     loop_var: group_name
+
+- name: "Generate /etc/genders"
+  ansible.builtin.template:
+    src: genders.jinja2
+    dest: /etc/genders
+    owner: root
+    group: root
+    mode: "0664"
