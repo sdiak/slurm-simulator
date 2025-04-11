@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+sleep 10s
+
 {% for group in wlm.groups %}
 sacctmgr -i add account name="{{ group }}"
 {% endfor %}
