@@ -6,6 +6,14 @@
   ansible.builtin.set_fact:
     nfs_server: "{{ groups['nfsd'][0] }}"
 
+# - name: Debug
+#   debug:
+#     msg:
+#       - "slurmctld_primary={{ slurmctld_primary }}"
+#       - "nfs_server={{ nfs_server }}"
+#       - "networks={{ networks }}"
+#   run_once: True
+
 - name: Wait for cloud-init to finish
   command: cloud-init status --wait
   changed_when: false

@@ -1,8 +1,8 @@
 nfs:
   exports:
-    - /home
-    - /root
-    - /etc/slurm
+    - { path: '/home', network: "{{ networks['storage'] }}" }
+    - { path: '/root', network: "{{ networks['admin'] }}" }
+    - { path: '/etc/slurm', network: "{{ networks['admin'] }}" }
 
 os_vars:
   RedHat:

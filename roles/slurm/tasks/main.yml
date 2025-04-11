@@ -38,7 +38,6 @@
   when: "'nfsd' in group_names"
   notify:
     - enable-slurmd-service
-    - enable-slurmctld-service
 
 - name: "Generate /etc/slurm/cgroup.conf"
   ansible.builtin.template:
