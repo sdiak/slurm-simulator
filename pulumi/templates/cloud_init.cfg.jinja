@@ -8,6 +8,7 @@ groups:
 users:
 {% for user in users %}
   - name: {{ user.name }}
+    shell: /bin/bash
 {% for key in user.ssh_authorized_keys %}
 {% if loop.first %}
     ssh-authorized-keys:
