@@ -110,3 +110,7 @@ The first tag should include :
 - ~~Create one slurm association per user/group membership~~,
 - ~~Use of the **storage** network for sharing `/home`~~,
 - Configured **OpenMPI** over the **fabric** network with `srun` using it.
+    - This one is hard, manual tests shows that on a cluster with a mix of Ubuntu and Rocky nodes :
+        - Login nodes can only submit mpi jobs to the same OS compute nodes,
+        - MPI jobs does not work accross OSes.
+    - Maybe limit that to a ansible task that ensures single OS Login+Compute nodes.
